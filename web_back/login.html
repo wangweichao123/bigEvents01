@@ -40,14 +40,14 @@
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+                    <h4 class="modal-title" id="myModalLabel">温馨提示!!!</h4>
                 </div>
                 <div class="modal-body">
-                    ...
+                    
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
                 </div>
             </div>
         </div>
@@ -72,10 +72,11 @@
                 // 若账号密码为空,弹框提示
                 if (username == "" || password == "") {
                     // 账号或密码为空(boostrap找模态框美化弹出框)
+                    $('.modal-body').text('账号或密码为空!!!');
                     $('#myModal').modal({
                                 keyboard: true
                     });
-                    return
+                    return;
                 }
                 // 发送ajax请求验证账号密码
                 $.ajax({
@@ -92,6 +93,7 @@
                             window.location.href = 'index.html';
                         }else{
                             // 账号或密码错误(boostrap找模态框美化弹出框)
+                            $('.modal-body').text('账号或密码错误!!!');
                             $('#myModal').modal({
                                 keyboard: true
                             });
