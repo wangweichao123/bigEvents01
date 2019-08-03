@@ -135,46 +135,48 @@
     </script>
 
     <script>
-        // 退出登录
-        // 给退出按钮注册点击事件
-        $('.icon-tuichu').parent().on('click', function (e) {
-            e.preventDefault();
-            // 弹框确认退出
-            $('#myModal').modal({
-                keyboard: true
-            });
-            // 若确定则退出
-            $('.btn-primary').on('click', function () {
-                // 发送ajax请求
-                $.ajax({
-                    type: 'post',
-                    url: 'http://localhost:8080/admin/user/logout',
-                    // data:{},
-                    // dataType:'json',
-                    success: function (backData) {
-                        if (backData.code == 200) {
-                            // 跳转回登录页
-                            window.location.href = 'login.html';
-                        }
-                    }
+        $(function () {
+            // 退出登录
+            // 给退出按钮注册点击事件
+            $('.icon-tuichu').parent().on('click', function (e) {
+                e.preventDefault();
+                // 弹框确认退出
+                $('#myModal').modal({
+                    keyboard: true
                 });
-            });
+                // 若确定则退出
+                $('.btn-primary').on('click', function () {
+                    // 发送ajax请求
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8080/admin/user/logout',
+                        // data:{},
+                        // dataType:'json',
+                        success: function (backData) {
+                            if (backData.code == 200) {
+                                // 跳转回登录页
+                                window.location.href = 'login.html';
+                            }
+                        }
+                    });
+                });
 
-        });
-        // 获取用户信息,并修改页面上的用户信息
-        // 页面一进入就获取,修改
-        $.ajax({
-        type:'get/post',
-        url: 'http://localhost:8080/admin/user/info',
-        // data:{},
-        dataType:'json',
-        success: function (backData) {
-            if (backData.code == 200) {
-                $('.user_info>span').text('欢迎&nbsp;&nbsp;'+backData.data.nickname);
-                $('.user_info>img').attr('src', backData.data.userPic);
-                $('.user_center_link>img').attr('src', backData.data.userPic);
-            }
-        }
+            });
+            // 获取用户信息,并修改页面上的用户信息
+            // 页面一进入就获取,修改
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8080/admin/user/info',
+                // data:{},
+                // dataType: 'json',
+                success: function (backData) {
+                    if (backData.code == 200) {
+                        $('.user_info>span').text('欢迎&nbsp;&nbsp;' + backData.data.nickname);
+                        $('.user_info>img').attr('src', backData.data.userPic);
+                        $('.user_center_link>img').attr('src', backData.data.userPic);
+                    }
+                }
+            });
         });
     </script>
 
