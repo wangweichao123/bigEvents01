@@ -72,14 +72,15 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-center">
-                            <a href="#" class="btn btn-success" data-toggle="modal" data-target="#addModal">新增分类</a>
+                            <a href="#" class="btn btn-success add-btn" data-toggle="modal"
+                                data-target="#addModal">新增分类</a>
                         </td>
                     </tr>
                 </tfoot>
             </table>
         </div>
     </div>
-
+    <!-- 模态框 -->
     <div class="modal fade" id="addModal">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -89,6 +90,7 @@
                 </div>
                 <div class="modal-body">
                     <form>
+                        <input type="hidden" id="tamp-id">
                         <div class="form-group">
                             <label for="recipient-name" class="control-label">分类名称:</label>
                             <input type="text" class="form-control name" id="recipient-name">
@@ -116,16 +118,7 @@
         $('#model_shutoff').click(function () {
             // alert('shutoff');
             $('#addModal').modal('hide');
-        });
-
-
-
-        $('.category_table').delegate('a', 'click', function () {
-            if ($(this).hasClass('btn-info')) {
-                $('#addModal .modal-title').html('修改分类名称');
-                $('#addModal').modal('show');
-            }
-        })      
+        });    
     </script>
     <!-- 导入模板引擎 -->
     <script src="./js/template-web.js"></script>
@@ -136,7 +129,7 @@
                 <td>{{v.name}}</td>
                 <td>{{v.slug}}</td>
                 <td class="text-center">
-                    <a href="javascript:editTr({&quot;id&quot;:&quot;1&quot;,&quot;slug&quot;:&quot;uncategorized&quot;,&quot;name&quot;:&quot;未分类&quot;});" class="btn btn-info btn-xs">编辑</a>
+                    <a href="#" atr_id="{{v.id}}" class="btn btn-info btn-xs">编辑</a>
                     <a href="javascript:deleteTr( 1 );" tap_id="{{v.id}}" class="btn btn-danger btn-xs btn-delete">删除</a>
                 </td>
             </tr>
@@ -161,29 +154,77 @@
             getArtical();
             // 给添加按钮注册点击事件
             $('#model_add').click(function () {
-                // 获取用户输入信息
-                var username = $('.name').val().trim();
-                var userslug = $('.slug').val().trim();
-                // 发送ajax
-                $.ajax({
-                    type: 'post',
-                    url: 'http://localhost:8080/admin/category/add',
-                    data: {
-                        name: username,
-                        slug: userslug
-                    },
-                    success: function (backData) {
-                        if (backData.code == 201) {
-                            alert('新增成功');
-                            $('#addModal').modal('hide');
-                            // 刷新页面
-                            getArtical();
+                if ($('#model_add').hasClass('btn-warning')) {
+                    // 获取修改信息
+                    var alterId = $('#tamp-id').val();
+                    var alterName = $('.name').val();
+                    var alterSlug = $('.slug').val();
+                    // 发送ajax修改信息
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8080/admin/category/edit',
+                        data: {
+                            id: alterId,
+                            name: alterName,
+                            slug: alterSlug
+                        },
+                        success: function (backData) {
+                            if (backData.code == 200) {
+                                alert('修改成功');
+                                // 重新渲染页面
+                                getArtical();
+                            }
                         }
-                    }
-                });
-                // alert('add');
-            });
+                    });
 
+                } else {
+                    // 获取用户输入信息
+                    var username = $('.name').val().trim();
+                    var userslug = $('.slug').val().trim();
+                    // 发送ajax
+                    $.ajax({
+                        type: 'post',
+                        url: 'http://localhost:8080/admin/category/add',
+                        data: {
+                            name: username,
+                            slug: userslug
+                        },
+                        success: function (backData) {
+                            if (backData.code == 201) {
+                                alert('新增成功');
+                                // 刷新页面
+                                getArtical();
+                            }
+                        }
+                    });
+                }
+                // alert('add');
+                $('#addModal').modal('hide');
+            });
+            // 给新增按钮注册点击事件
+            $('.add-btn').on('click', function () {
+                $('#model_add').removeClass('btn-warning');
+                // 将模态框中信息清空
+                $('.name').val('');
+                $('.slug').val('');
+                $('#addModal .modal-title').html('新增分类');
+                $('#model_add').text('新增');
+            })
+            // 给编辑按钮注册点击事件
+            $('tbody').on('click', '.btn-info', function () {
+                // 将信息传递到模态框中
+                var atrName = $(this).parent().prev().prev().text();
+                var atrSlug = $(this).parent().prev().text();
+                var id = $(this).attr('atr_id');
+                $('#tamp-id').val(id);
+                $('.name').val(atrName);
+                $('.slug').val(atrSlug);
+
+                $('#model_add').addClass('btn-warning');
+                $('#addModal .modal-title').html('修改分类');
+                $('#model_add').text('修改');
+                $('#addModal').modal('show');
+            })
             // 删除内容,委托注册
             $('tbody').on('click', '.btn-delete', function () {
                 if (confirm('确定删除?')) {
@@ -206,6 +247,7 @@
                     });
                 }
             });
+
         });
 
     </script>
