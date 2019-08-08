@@ -15,6 +15,8 @@
     <script src="js/jedate/js/jedate.js"></script>
     <script src="js/tinymce/js/tinymce/tinymce.min.js"></script>
     <script src="js/tinymce/js/tinymce_setup.js"></script>
+    <!-- 引入moment插件js -->
+    <script src="./js/moment.js"></script>
 </head>
 
 <body>
@@ -27,19 +29,21 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail3" placeholder="文章标题">
+                        <input type="email" class="form-control" name="title" id="inputEmail3" placeholder="文章标题">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
-                        <input type="file" id="exampleInputFile">
+                        <img id="bg-pic" src="./images/2.jpg" alt="" style="width:100px">
+                        <br>
+                        <input type="file" name="cover" id="exampleInputFile">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <select name="categoryId" class="form-control article_list">
                             <option>1</option>
                             <option>2</option>
                             <option>3</option>
@@ -53,7 +57,8 @@
                     <div class="col-sm-4">
 
                         <div class="input-group">
-                            <input type="text" class="form-control" placeholder="YYYY-MM-DD" id="dateinput">
+                            <input type="text" class="form-control getDate" name="date" placeholder="YYYY-MM-DD"
+                                id="dateinput">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
@@ -65,21 +70,83 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                        <textarea class="form-control" id="rich_content" name="content" placeholder="文章内容">
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Assumenda fugiat illo nihil molestias ab. Laborum eius non atque, totam sapiente quae obcaecati assumenda ratione inventore pariatur maiores, qui libero delectus.
-                            </textarea>
+                        <textarea class="form-control" id="rich_content" placeholder="文章内容">
+
+                        </textarea>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success">发布</button>
+                        <button type="submit" class="btn btn-success add-artical">发布</button>
                         <button type="submit" class="btn btn-default">存为草稿</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-
+    <!-- 导入模板js -->
+    <script src="./js/template-web.js"></script>
+    <!-- 文章类别模板 -->
+    <script id="temp_selected" type="text/html">
+    {{each data v}}
+        <option value="{{v.id}}">{{v.name}}</option>
+    {{/each}}
+    </script>
+    <script>
+        // 入口函数
+        $(function () {
+            // 设置文件图片预览
+            // 给input:file 注册change事件(值改变事件)
+            $('#exampleInputFile').on('change', function (e) {
+                // 阻止默认跳转
+                e.preventDefault();
+                // 通过files[0]获取文件
+                var file = this.files[0];  //this用dom方法
+                // 用URL.createObjectURL()方法创建url
+                var url = URL.createObjectURL(file);
+                // 将url赋值给预览的img的src属性
+                $('#bg-pic').attr('src', url);
+            });
+            // 文章类别
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8080/admin/category/list',
+                success: function (backData) {
+                    if (backData.code == 200) {
+                        var resHtml = template('temp_selected', backData);
+                        $('.article_list').html(resHtml);
+                    }
+                }
+            });
+            // 一进页面显示当前日期
+            // var date = new Date(1565147534000);
+            var strDate = moment().format('YYYY-MM-DD');
+            console.log(strDate);
+            $('.getDate').val(strDate);
+            // 给发布按钮设置点击事件
+            $('.add-artical').on('click', function (e) {
+                e.preventDefault();
+                // 获取编辑器中文本
+                var tinyText = tinyMCE.activeEditor.getContent();
+                var fd = new FormData($('form')[0]);
+                fd.append('content', tinyText);
+                fd.append('state', '已发布');
+                // 发送ajax
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:8080/admin/article/publish',
+                    data: fd,
+                    contentType:false,
+                    processData: false,
+                    success: function (backData) {
+                        if (backData.code == 200) {
+                            alert('发布成功');
+                        }
+                    }
+                });
+            })
+        });
+    </script>
 </body>
 
 </html>

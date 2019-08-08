@@ -27,20 +27,20 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章标题：</label>
                     <div class="col-sm-10">
-                        <input type="email" class="form-control" id="inputEmail3" value="文章标题文字">
+                        <input type="email" class="form-control art-title" name="title" id="inputEmail3" value="文章标题文字">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">文章封面：</label>
                     <div class="col-sm-10">
                         <img src="images/pic06.jpg" class="article_cover">
-                        <input type="file" id="exampleInputFile">
+                        <input type="file" name="cover" id="exampleInputFile">
                     </div>
                 </div>
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章类别：</label>
                     <div class="col-sm-4">
-                        <select class="form-control">
+                        <select class="form-control cate-type" name="categoryId">
                             <option>类别一</option>
                             <option>类别二</option>
                             <option>类别三</option>
@@ -54,7 +54,7 @@
                     <div class="col-sm-4">
 
                         <div class="input-group">
-                            <input type="text" class="form-control" value="2019-05-17" id="dateinput">
+                            <input type="text" class="form-control" value="2019-05-17" name="date" id="dateinput">
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="button"
                                     onclick="jeDate('#dateinput',{trigger:false,format: 'YYYY-MM-DD'})"><i
@@ -66,18 +66,96 @@
                 <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">文章内容：</label>
                     <div class="col-sm-10">
-                        <input type="text" class="form-control" id="rich_content" name="content" placeholder="文章内容" value="文章内容">
+                        <input type="text" class="form-control" id="rich_content" placeholder="文章内容"
+                            value="文章内容">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-success">修改</button>
+                        <button type="submit" class="btn btn-success btn-change">修改</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
+    <!-- 导入模板js -->
+    <script src="./js/template-web.js"></script>
+    <script id="temp_selected" type="text/html">
+        {{each data v}}
+            <option value="{{v.id}}">{{v.name}}</option>
+        {{/each}}
+    </script>
+    <script>
+        // 入口函数
+        $(function () {
+            // 文件预览
+            // 设置文件图片预览
+            // 给input:file 注册change事件(值改变事件)
+            $('#exampleInputFile').on('change', function (e) {
+                // 阻止默认跳转
+                e.preventDefault();
+                // 通过files[0]获取文件
+                var file = this.files[0];  //this用dom方法
+                // 用URL.createObjectURL()方法创建url
+                var url = URL.createObjectURL(file);
+                // 将url赋值给预览的img的src属性
+                $('.article_cover').attr('src', url);
+            });
 
+            // 打开页面,渲染内容
+            // 获取所有文章类别
+            // 获取所有文章类别,并用模板设置成下拉选项
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8080/admin/category/list',
+                success: function (backData) {
+                    if (backData.code == 200) {
+                        var resHtml = template('temp_selected', backData);
+                        $('.form-control').html(resHtml);
+                    }
+                }
+            });
+            // 根据id获取文章信息
+            // 获取id
+            var id = window.location.search.split('=')[1];
+            $.ajax({
+                type: 'get',
+                url: 'http://localhost:8080/admin/article/search',
+                data: {
+                    id: id
+                },
+                success: function (backData) {
+                    console.log(backData);
+                    if (backData.code == 200) {
+                        $('.art-title').val(backData.data.title);
+                        $('.article_cover').attr('src', backData.data.cover);
+                        $('.cate-type').val(backData.data.categoryId);
+                        $('#dateinput').val(backData.data.date);
+                        $('#rich_content').val(backData.data.content);
+                    }
+                }
+            });
+            // 发送ajax请求,完成编辑
+            // 点击修改事件
+            $('.btn-change').on('click', function (e) {
+                e.preventDefault();
+                var fd = new FormData($('form')[0]);
+                var tinyText = tinyMCE.activeEditor.getContent();
+                fd.append('content', tinyText);
+                fd.append('id', id);
+                $.ajax({
+                    type: 'post',
+                    url: 'http://localhost:8080/admin/article/edit',
+                    data: fd,
+                    contentType:false,
+                    processData:false,
+                    success: function (backData) {
+                        console.log(backData);
+                    }
+                });
+            })
+        });
+    </script>
 </body>
 
 </html>
