@@ -343,6 +343,7 @@
                     initArtical(page,stateType,idNum);
                 }
             };
+            
             $pagination.twbsPagination(defaultOpts);
             // 点击筛选渲染页面
             var stateType = '';
@@ -358,6 +359,7 @@
                 // 渲染页面
                 initArtical(1,stateType,idNum);
             })
+
             function initArtical(page,stateType,idNum) {
                 $.ajax({
                     type: 'get',
